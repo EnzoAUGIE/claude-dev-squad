@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.1.2] — 2026-11-16
+### Documentation
+- README §7 réécrit : résumé, 3 catégories de skills (préchargés / interactifs / autres), installation par projet, tableau de vérification, entretien
+- `parallel.sh` accepte `VERDICT: OK` en plus de `VERDICT: APPROUVE`
+
 ## [1.1.1] — 2026-11-16 (retours du premier test réel)
 ### Corrigé
 - Skills de Matt Pocock : `to-prd` → `to-spec`, `to-issues` → `to-tickets` (renommés en amont)

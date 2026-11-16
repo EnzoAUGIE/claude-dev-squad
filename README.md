@@ -255,52 +255,84 @@ claude
 
 ## 7. Intégration des skills de Matt Pocock
 
-[mattpocock/skills](https://github.com/mattpocock/skills) (licence MIT) est un ensemble de skills d'ingénierie : TDD, code review, PRD, diagnostic de bugs, etc.
+[mattpocock/skills](https://github.com/mattpocock/skills) (licence MIT) est un ensemble de skills d'ingénierie : TDD, revue de code, spécifications, diagnostic de bugs, etc. Nos agents définissent **qui** fait le travail ; ses skills décrivent **comment** bien le faire.
 
-> ⚠️ **À savoir.** Un sous-agent Claude Code **n'hérite pas** des skills de ta session. Il ne les utilise que s'ils sont listés dans le champ `skills:` de son fichier, qui les **précharge** au démarrage de l'agent. Le script `link-pocock-skills.sh` remplit ce champ automatiquement pour chaque agent, et seulement avec les skills réellement installés. Une fois liés, les agents appliquent les skills **sans que tu aies à le demander**.
+> **En résumé**
+> - ✅ **Automatique** : une fois liés, 4 agents appliquent leurs skills sans que tu le demandes.
+> - 🙋 **À lancer toi-même** : les skills interactifs (`/grill-with-docs`, `/to-spec`) se lancent **avant** `/squad`.
+> - 📁 **Par projet** : les skills s'installent et se lient **dans chaque projet**.
+> - 🔌 **Optionnel** : sans skills, l'orchestrateur fonctionne normalement ; les agents suivent alors leurs seules consignes.
 
-| Agent | Skills liés s'ils sont installés |
-|-------|----------------------------------|
-| architecte | `codebase-design`, `domain-modeling` |
-| developpeur | `tdd`, `diagnosing-bugs` |
-| testeur | `tdd`, `diagnosing-bugs` |
-| relecteur | `code-review` |
-| rôles ad hoc (`/squad`) | lisent les skills de `.claude/skills/` à la demande |
+### 7.1 Les trois catégories de skills
 
-**Skills à lancer toi-même.** Certains skills sont marqués `disable-model-invocation: true` par Matt Pocock, parce qu'ils sont interactifs : ils te posent des questions, ce qu'un sous-agent ne peut pas faire. Le script ne les lie pas et te l'indique. Lance-les **avant** l'orchestrateur :
+**1. Préchargés dans les agents (automatique).** Un sous-agent Claude Code **n'hérite pas** des skills de ta session : il ne les utilise que s'ils sont listés dans le champ `skills:` de son fichier, qui les **précharge** au démarrage de l'agent. Le script `link-pocock-skills.sh` remplit ce champ, et seulement avec les skills réellement installés.
+
+| Agent | Skills préchargés | Effet observé dans la démo |
+|-------|-------------------|----------------------------|
+| architecte | `codebase-design`, `domain-modeling` | conception des modules, vocabulaire métier |
+| developpeur | `tdd`, `diagnosing-bugs` | tests écrits d'abord (rouge), puis code (vert), un commit par fonction |
+| testeur | `tdd`, `diagnosing-bugs` | +20 tests de cas limites, bug localisé à la ligne près |
+| relecteur | `code-review` | revue classée 🔴/🟠/🟡, chaque point avec fichier:ligne |
+| chef-de-projet | — | n'en a pas besoin : il compose l'équipe |
+| rôles ad hoc (`/squad`) | — | lisent un skill de `.claude/skills/` si leur mission s'y prête |
+
+**2. Interactifs, à lancer toi-même.** Matt Pocock marque certains skills `disable-model-invocation: true` parce qu'ils te posent des questions, ce qu'un sous-agent ne peut pas faire. Claude Code refuse de les précharger ; le script les ignore avec un avertissement `⚠️`. Enchaînement recommandé pour une fonctionnalité importante :
 ```
 > /grill-with-docs je veux un système de notifications par email   # affine la demande avec toi
-> /to-spec                                                           # écrit la spec dans .scratch/<feature>/
+> /to-spec                                                           # écrit la spec dans .scratch/<feature>/spec.md
 > /squad implémente la spec de .scratch/notifications/spec.md        # l'équipe l'exécute
 ```
-Pour voir quels skills sont préchargeables : `grep -L "disable-model-invocation: *true" .claude/skills/*/SKILL.md`
+Concernés au moment de l'écriture : `grill-with-docs`, `to-spec`, `improve-codebase-architecture`.
 
-**Installation recommandée** (copies dans `.claude/skills/` du projet, compatibles avec le préchargement) :
+**3. Les autres** (`triage`, `to-tickets`, `prototype`, `research`…) restent disponibles dans ta session principale, mais ne sont liés à aucun agent.
+
+### 7.2 Installation (à faire dans chaque projet)
+
 ```bash
 cd ~/code/mon-projet
-npx skills@latest add mattpocock/skills
-# → agent cible : Claude Code
-# → agent cible : Claude Code · portée : Project · méthode : Copy
-# → coche au minimum : setup-matt-pocock-skills, tdd, code-review, diagnosing-bugs, codebase-design, domain-modeling, grill-with-docs, to-spec
-.claude/scripts/link-pocock-skills.sh      # lie les skills trouvés aux agents
+~/tools/claude-dev-squad/install.sh .          # 1. l'équipe d'agents
+npx skills@latest add mattpocock/skills         # 2. les skills
+#   → agent cible : Claude Code · portée : Project · méthode : Copy
+#   → coche au minimum : setup-matt-pocock-skills, tdd, code-review, diagnosing-bugs,
+#                        codebase-design, domain-modeling, grill-with-docs, to-spec
+.claude/scripts/link-pocock-skills.sh           # 3. lier les skills aux agents
 claude
-> /setup-matt-pocock-skills                 # une fois par dépôt
+> /setup-matt-pocock-skills                     # 4. une fois par dépôt (issues, labels, docs)
 ```
-`./install.sh <projet> --with-pocock` enchaîne l'installeur `npx` et le script de liaison.
+Raccourci : `./install.sh <projet> --with-pocock` enchaîne les étapes 1 à 3.
 
-Vérification : `head -10 .claude/agents/developpeur.md` doit afficher un bloc `skills:` avec `- tdd`. Avec `/squad`, la colonne **Skills** de `TEAM.md` indique aussi quels skills chaque agent va utiliser.
+Résultat attendu de l'étape 3 :
+```
+✔ architecte ← codebase-design domain-modeling
+✔ developpeur ← tdd diagnosing-bugs
+✔ testeur ← tdd diagnosing-bugs
+✔ relecteur ← code-review
+```
 
-| Action | Commande |
-|--------|----------|
-| Relier après une installation ou une mise à jour des skills | `.claude/scripts/link-pocock-skills.sh` |
+### 7.3 Vérifier
+
+| Où | Quoi | Attendu |
+|----|------|---------|
+| 🖥 Terminal | `head -10 .claude/agents/developpeur.md` | un bloc `skills:` avec `- tdd` |
+| 🖥 Terminal | `grep -L "disable-model-invocation: *true" .claude/skills/*/SKILL.md` | liste des skills préchargeables |
+| 🤖 Claude Code | « Quels sous-agents de ce projet peux-tu utiliser ? Donne nom, modèle et skills, sans rien lancer. » | les 5 agents et leurs skills |
+| 🤖 `/squad` | colonne **Skills** de `TEAM.md` | les skills de chaque agent retenu |
+
+### 7.4 Entretien
+
+| Situation | Commande |
+|-----------|----------|
+| Après une installation ou une mise à jour des skills (`npx skills update`) | `.claude/scripts/link-pocock-skills.sh`, puis relancer `claude` |
 | Retirer tous les liens | `.claude/scripts/link-pocock-skills.sh --unlink` |
 | Changer la correspondance agent → skills | fonction `skills_for()` dans le script |
+| Un skill a été renommé en amont (ex. `to-prd` → `to-spec`) | mettre à jour `skills_for()`, puis relancer le script |
 
-> Le plugin géré (`/plugin install mattpocock-skills`) fonctionne pour ta session principale, mais ses skills ne sont pas dans `.claude/skills/` : le script ne peut donc pas les lier aux agents. Pour l'orchestrateur, préfère l'installation `npx`.
->
-> Les skills préchargés ajoutent leur contenu au contexte de chaque agent, donc un peu plus de tokens. C'est pour ça que chaque agent n'en reçoit que 1 à 3.
+### 7.5 À savoir
 
-Ce dépôt **ne redistribue pas** les skills de Matt Pocock : il les référence. Tu profites ainsi de ses mises à jour, et c'est plus propre vis-à-vis de l'auteur. Le détail est dans [docs/MATT_POCOCK.md](docs/MATT_POCOCK.md).
+- **Plugin ou `npx` ?** Le plugin géré (`/plugin install mattpocock-skills`) fonctionne pour ta session principale, mais ses skills ne sont pas dans `.claude/skills/` : le script ne peut pas les lier aux agents. Pour l'orchestrateur, utilise `npx`.
+- **Coût.** Un skill préchargé ajoute son contenu au contexte de l'agent, donc des tokens. C'est pour ça que chaque agent n'en reçoit que 1 ou 2.
+- **Copie `.agents/skills/`.** L'installeur `npx` en crée une copie pour d'autres outils (Cursor, Codex…). `install.sh` l'ajoute au `.gitignore`.
+- **Licence.** Ce dépôt **ne redistribue pas** les skills de Matt Pocock : il explique comment les installer depuis leur source officielle. C'est plus propre pour l'auteur, et tu reçois ses mises à jour. Détails dans [docs/MATT_POCOCK.md](docs/MATT_POCOCK.md).
 
 ## 8. Personnalisation
 

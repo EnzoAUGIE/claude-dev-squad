@@ -85,7 +85,7 @@ for name in $NAMES; do
   wt="$WT_DIR/$name"
   verdict="?"
   tests="?"
-  [ -f "$wt/REVIEW.md" ] && { grep -q "^VERDICT: APPROUVE" "$wt/REVIEW.md" && verdict="✅ approuvé" || verdict="🔁 changements"; }
+  [ -f "$wt/REVIEW.md" ] && { grep -qE "^VERDICT: (APPROUVE|OK)" "$wt/REVIEW.md" && verdict="✅ approuvé" || verdict="🔁 changements"; }
   [ -f "$wt/TEST_REPORT.md" ] && { grep -q "^STATUT: VERT" "$wt/TEST_REPORT.md" && tests="✅" || tests="❌"; }
   printf "  %-15s branche feat/%-15s tests %s  revue %s\n" "$name" "$name" "$tests" "$verdict"
 done

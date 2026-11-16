@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.1.3] — 2026-11-16
+### Documentation
+- README : sommaire « Les 4 agents » → « Les agents permanents » (5 agents), ancre corrigée
+- README §5 : le contrat mentionne `VERDICT: OK`, accepté comme approbation au même titre que `VERDICT: APPROUVE`
+- CHANGELOG : l'idée GitHub Actions utilise l'étiquette `ready-for-agent`, comme dans le reste de la documentation
+
 ## [1.1.2] — 2026-11-16
 ### Documentation
 - README §7 réécrit : résumé, 3 catégories de skills (préchargés / interactifs / autres), installation par projet, tableau de vérification, entretien
@@ -34,7 +40,7 @@
 - Projet de démo `examples/demo-calculatrice`
 
 ## Idées pour la suite
-- Workflow GitHub Actions qui lance `pipeline.sh` sur une issue étiquetée `agent`
+- Workflow GitHub Actions qui lance `pipeline.sh` sur une issue étiquetée `ready-for-agent`
 - Agent `securite` (audit des dépendances, OWASP)
 - Agent `documentaliste` (README, docstrings)
 - Démo GIF dans le README

@@ -43,7 +43,7 @@ Au total : **6 commits**, **1 boucle de correction**, **un bug réel détecté p
 2. [Prérequis](#2-prérequis)
 3. [Installation (5 minutes)](#3-installation-5-minutes)
 4. [Utilisation](#4-utilisation)
-5. [Les 4 agents](#5-les-4-agents)
+5. [Les agents permanents](#5-les-agents-permanents)
 6. [Travail en parallèle](#6-travail-en-parallèle)
 7. [Intégration des skills de Matt Pocock](#7-intégration-des-skills-de-matt-pocock)
 8. [Personnalisation](#8-personnalisation)
@@ -215,7 +215,7 @@ git checkout main && git merge --no-ff feat/xxx   # toi seul merges
 
 **Contrat entre agents.** Les scripts lisent des lignes fixes :
 - `TEST_REPORT.md` contient `STATUT: VERT` ou `STATUT: ROUGE` ;
-- `REVIEW.md` contient `VERDICT: APPROUVE` ou `VERDICT: CHANGEMENTS`.
+- `REVIEW.md` contient `VERDICT: APPROUVE` (ou `VERDICT: OK`, accepté comme approbation) ou `VERDICT: CHANGEMENTS`.
 - `TEAM.md` (lu par `/squad`) contient le tableau de l'équipe, avec les colonnes Modèle et Étape.
 
 Le détail du fonctionnement est dans [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).

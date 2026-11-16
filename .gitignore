@@ -1,0 +1,9 @@
+.DS_Store
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+.claude/settings.local.json
+.claude/logs/
+.claude/worktrees/
+*.zip
